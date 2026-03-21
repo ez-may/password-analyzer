@@ -30,9 +30,14 @@ def _generate_substitution_variants(text: str) -> list:
     """
 
     def recurse(index: int, current: str) -> list:
-        # base case — full string built, keep only if entirely alphabetic
+        # base case. full string built, keep only if entirely alphabetic and
+        # if the variant is not the same as original. Handles cases where no
+        # substitution takes place
         if index == len(text):
-            return [current] if current.isalpha() else []
+            if current.isalpha() and current != text.lower():
+                return [current]
+            else:
+                return []
 
         char = text.lower()[index]
         results = []

@@ -24,13 +24,16 @@ def analyze_password(password: str) -> dict:
     shannon_result = calculate_entropy(password)
     zxcvbn_result = zxcvbn_score(password)
 
-    return {
-        "password": password,
-        "hibp": hibp_result,
-        "patterns": pattern_result,
-        "strength": {
-            "shannon": shannon_result,
-            "zxcvbn": zxcvbn_result,
-            "nist": nist_result
+    if not password:
+        return {"failure": "empty password"}
+    else:
+        return {
+            "password": password,
+            "hibp": hibp_result,
+            "patterns": pattern_result,
+            "strength": {
+                "shannon": shannon_result,
+                "zxcvbn": zxcvbn_result,
+                "nist": nist_result
+            }
         }
-    }

@@ -3,7 +3,7 @@ from zxcvbn.matching import L33T_TABLE
 import os
 
 
-def _generate_reverse_subtitution_table() -> dict:
+def _generate_reverse_substitution_table() -> dict:
     """
     Reverses the mapping of character substitutions using zxcvbn's L33T_TABLE.
     L33T_TABLE maps letters to substitutions e.g. {"a": ["@", "4"]}
@@ -20,7 +20,7 @@ def _generate_reverse_subtitution_table() -> dict:
 
 
 # built once at module load — avoids rebuilding on every function call
-SUBSTITUTION_MAP = _generate_reverse_subtitution_table()
+SUBSTITUTION_MAP = _generate_reverse_substitution_table()
 
 
 def _generate_substitution_variants(text: str) -> list:
@@ -108,7 +108,6 @@ def _detect_keyboard_walks(password: str) -> dict:
     so that walks are detected regardless of shift key usage.
     Only the longest walk at each position is returned.
     Matches are returned as the original password characters, not normalized.
-    Precomputed walk set allows O(1) lookup per position.
     """
 
     SHIFT_TO_NUMBER = {
@@ -154,12 +153,21 @@ def _detect_keyboard_walks(password: str) -> dict:
 
 def _load_wordlist() -> set:
     """
-    Loads the wordlist from disk into a set for O(1) lookup.
+    Loads the wordlist from disk into a set.
     Called once at module load time.
     """
     wordlist_path = os.path.join(os.path.dirname(__file__), "wordlist.txt")
-    with open(wordlist_path, "r", encoding="utf-8") as f:
-        return {line.strip().lower() for line in f if line.strip()}
+    try:
+        with open(wordlist_path, "r", encoding="utf-8") as f:
+            return {line.strip().lower() for line in f if line.strip()}
+    except FileNotFoundError:
+        print(f"Warning: wordlist not found at {wordlist_path}. "
+              f"Dictionary check will be skipped.")
+        return set()
+    except IOError:
+        print("Warning: wordlist could not be read. "
+              "Dictionary check will be skipped.")
+        return set()
 
 
 WORDLIST = _load_wordlist()
@@ -186,7 +194,7 @@ def _check_dictionary(passwords: str | list) -> dict:
 
 def analyze_patterns(password: str) -> dict:
     """
-    Orchestrates all pattern detection checks for a given password.
+    Executes all pattern detection checks for a given password.
     Runs substitution variant generation, dictionary check, repeated
     character detection, and keyboard walk detection.
     Returns a single flat dictionary with all results and a top level

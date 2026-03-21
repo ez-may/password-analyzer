@@ -19,16 +19,13 @@ def check_breach(password: str) -> dict:
             timeout=5
         )
         response.raise_for_status()
-    except requests.exceptions.ConnectionError:
-        return exception_val
-    except requests.exceptions.Timeout:
-        return exception_val
-    except requests.exceptions.RequestException:
+    except (requests.exceptions.ConnectionError, requests.exceptions.Timeout,
+            requests.exceptions.RequestException):
         return exception_val
     
     hashes = (line.split(":") for line in response.text.splitlines())
     
-    for returned_suffix , count in hashes:
+    for returned_suffix, count in hashes:
         if returned_suffix == suffix:
             return {"status": "breached", "count": int(count)}
     return {"status": "clean", "count": 0}
